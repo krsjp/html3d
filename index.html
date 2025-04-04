@@ -60,11 +60,11 @@
     </script>
 </head>
 <body>
-    <a-scene xr-mode-ui="enabled: false" vr-mode-ui="enabled: true" renderer="colorManagement: true;">
+    <a-scene>
         <a-entity passthrough gltf-model="#model"></a-entity>
-        <a-camera position="0 0 0"></a-camera>
+        <a-camera position="0 1.5 1"></a-camera>
         <a-assets>
-                <a-asset-item id="model" src="/model/model.glb"></a-asset-item>
+                <a-asset-item id="model" src="./html3d/model/model.glb"></a-asset-item>
             </a-assets>
     </a-scene>
 </body>
