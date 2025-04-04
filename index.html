@@ -1,19 +1,71 @@
+
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Installation</title>
-        <link rel="stylesheet" href="styles.css" />
-        <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
-    </head>
-    <body>
-        <a-scene>
-        
-            <a-assets>
-                <a-asset-item id="model" src="./html3d/model/scene.gltf"></a-asset-item>
+<html lang=en>
+<head>
+    <title>A-Frame Passthrough Example</title>
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    <script>
+        AFRAME.registerComponent('passthrough', {
+            init: async function () {
+                const scene = this.el.sceneEl;
+                const xrSystem = scene.renderer.xr;
+                const session = xrSystem.getSession();
+
+                if (!session) {
+                    console.error('XR session not available.');
+                    return;
+                }
+
+                try {
+                    const environmentBlendMode = await session.requestEnvironmentBlendMode(['opaque', 'additive', 'alpha-blend']);
+
+                    if (environmentBlendMode === 'opaque') {
+                        console.log('Opaque blend mode not supported, attempting additive or alpha-blend');
+                    }
+
+                    const layer = new XRQuadLayer({
+                        space: session.requestReferenceSpace('local'),
+                        textureType: 'texture',
+                        width: 1,
+                        height: 1,
+                        viewPixelWidth: scene.renderer.domElement.width,
+                        viewPixelHeight: scene.renderer.domElement.height,
+                    });
+
+                    session.updateRenderState({
+                        layers: [layer],
+                    });
+
+                    const cameraFeed = await session.getViewerPose(session.requestReferenceSpace('viewer'));
+
+                    if (cameraFeed && cameraFeed.views && cameraFeed.views[0]) {
+                        const cameraTexture = cameraFeed.views[0].cameraTexture;
+
+                        if (cameraTexture) {
+                            const material = new THREE.MeshBasicMaterial({ map: cameraTexture });
+                            const geometry = new THREE.PlaneGeometry(10, 10);
+                            const mesh = new THREE.Mesh(geometry, material);
+                            this.el.setObject3D('passthrough-mesh', mesh);
+                        } else {
+                            console.error('Camera texture not available.');
+                        }
+                    } else {
+                        console.error('Camera feed not available.');
+                    }
+                } catch (error) {
+                    console.error('Passthrough setup failed:', error);
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <a-scene xr-mode-ui="enabled: false" vr-mode-ui="enabled: true" renderer="colorManagement: true;">
+        <a-entity passthrough gltf-model="#model"></a-entity>
+        <a-camera position="0 0 0"></a-camera>
+        <a-assets>
+                <a-asset-item id="model" src="/model/model.glb"></a-asset-item>
             </a-assets>
-            
-        <a-entity gltf-model="#model"></a-entity>
-        </a-scene>
-    </body>
+    </a-scene>
+</body>
 </html>
