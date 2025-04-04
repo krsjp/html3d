@@ -61,11 +61,14 @@
 </head>
 <body>
     <a-scene>
-        <a-entity passthrough gltf-model="#model"></a-entity>
+        
         <a-camera position="0 1.5 1"></a-camera>
         <a-assets>
-                <a-asset-item id="model" src="./html3d/model/model.glb"></a-asset-item>
-            </a-assets>
+                <a-asset-item id="model" src="/html3d/model/model.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity  gltf-model="#model" passthrough></a-entity>
+
     </a-scene>
 </body>
 </html>
